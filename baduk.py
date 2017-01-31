@@ -98,18 +98,25 @@ class Board:
                 self.board_group_next_group_number+=1
             if near_empty_number == 0:
                 self.clone().try_move()
-            else:
+            else: #주의에 빈곳이 있어서 무조건 놓을 수 있음
                 self.board_state[x,y] = color
+                #group을 주위와 맞추기 위해서 검색함
                 for d in range(4):
                     nx = x + dx[d]
                     ny = y + dy[d]
                     ncolor = self.board_state[nx,ny]
-                    if color == ncolor and self.board_group[x,y]==0:
+                    if ncolor != State.EMPTY:
+                        self.board_group_live[ self.board_group[nx,ny]] -=1
+                    
+                    if color == ncolor and self.board_group[x,y]==0:  #현재 빈곳이라 
                         self.board_state[x,y] = color
                         self.board_group[x,y] = self.board_group[nx,ny]
-                        self.board_group_live[self.self.board_group[x,y]] -=1
-                    #elif if color == ncolor and self.board_group[x,y]!=0:
-                        #join_group( self.board_group[x,y] , self.board_group[nx,ny])
+                        self.board_group_live[self.self.board_group[x,y]]+=near_empty_number
+                    elif color == ncolor and self.board_group[x,y]!=0:
+                        gxy = self.board_group[x,y]
+                        gnxy = self.board_group[nx,ny]
+                        if gxy != gnxy:
+                            join_group( gxy , gnxy)
 
                 # 일단 주변 그룹넘버로 정하고
                 # 더 찾아서 더 있으면 join
@@ -117,6 +124,18 @@ class Board:
         return True
     def try_move(self):
         return True
+    def join_group(self,ga,gb):
+        gmax = max(ga,gb)
+        gmin = ga+gb - gmax
+        for x in range(size2):
+            for y in range(size2):
+                if board_group[x,y]==gmax:
+                    board_group[x,y]=gmin
+        self.board_group_live[gmin] += self.board_group_live[gmax]
+        
+                
+
+                
 
     def ToString(self):
         rev = np.chararray((self.size2 ** 2))
